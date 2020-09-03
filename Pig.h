@@ -5,7 +5,7 @@ struct Pig{
 	double weight;//体重 单位:斤 
 	int value;//猪价单价：黑猪-15 小花猪-7 大花白猪-6 
 	double price;//猪总价 
-	int fed_time=400;//饲养时间 
+	int fed_time;//饲养时间 
 	int id;//猪在猪圈里的编号 
 	Pig* next;//同一个猪圈的下一头猪 
 	Pig (){
@@ -41,7 +41,8 @@ public:
 	void search2();//统计小花猪的数量和体重、饲养时间分布情况
 	void search3();//统计大花白猪的数量和体重、饲养时间分布情况
 	void search();//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况
-}ph[105];
+	void clear();//清空当前猪圈 
+};
 
 Pighouse::Pighouse(){// 默认构造函数
 	pig_num=0;
@@ -222,56 +223,10 @@ void Pighouse::search(){//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况
 		search3();
 	}
 }
-double sellcount(){//计算本回合卖猪总收入 
-	int m;
-	for(int i=0;i<100;i++){
-		m+=ph[i].sellpig();
-	} 
-	return m;
-}
-void newpig(Pig *p){//为新猪分配猪圈
-	int flag=0,sp=0;//sp:是否分配到空猪圈 
-  	if(p->name==1)//黑猪只能分配到黑猪圈/空猪圈 
-		flag=1;
-	for(int i=0;i<100;i++){
-		if(ph[i].Getpig_num()==0){
-			ph[i].buypig(p);
-			sp=1; 
-			//cout<<"被分配空猪圈："<<i<<endl;
-			break;
-		}	
-	}
-	if(sp==0){
-		int min_num=20;
-		int index=101;
-		for(int i=0;i<100;i++){
-			if(ph[i].GetisBlack()==flag){
-				if(min_num > ph[i].Getpig_num()){
-					min_num=ph[i].Getpig_num();
-					index=i;
-				}
-			}
-		}
-		//cout<<"被分配猪圈："<<index<<endl;
-		ph[index].buypig(p);
-	}
-
-}
-int main(){
-	Pig pp(1,2.3);
-	pp.countp();
-//	cout<<pp.name<<" "<<pp.price<<endl;
-	newpig(&pp);
-//	ph[0].printmessage();
-	ph[0].search();
-	//cout<<"0号猪圈卖出金额："<<ph[0].sellpig()<<endl;
-	
-	Pig ppp(2,5.3);
-	ppp.countp();
-//	cout<<ppp.name<<" "<<ppp.price<<endl;
-	newpig(&ppp);
-//	ph[1].printmessage();
-
-	ph[1].search();
-//	cout<<"1号猪圈卖出金额："<<ph[1].sellpig();
+void Pighouse::clear(){
+	pig_num=0;
+	head=NULL;
+	isBlack=0;
 } 
+
+
