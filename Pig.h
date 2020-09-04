@@ -47,6 +47,7 @@ public:
 	void search();//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况
 	void clear();//清空当前猪圈 
 	void pupdate(); //更新猪猪信息 
+	void print_all();//打印所有猪猪所有信息 
 };
 
 Pighouse::Pighouse(){// 默认构造函数
@@ -221,8 +222,9 @@ void Pighouse::search3(){
 
 }
 void Pighouse::search(){//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况
-	if(GetisBlack())
+	if(GetisBlack()){
 		search1();
+	}	
 	else{
 		search2();
 		search3();
@@ -235,13 +237,29 @@ void Pighouse::clear(){
 } 
 void Pighouse::searchpig(int x){
 	Pig *p1=head;
-	for(;p1!=NULL;p1=p1->next){
-		if(p1->id==x)
-			break;
-	}
-	string s;
-	if(p1->name==1) s="黑猪";
-	else if(p1->name==2) s="小花猪";
-	else s="大花白猪";
-	cout<<"此猪为"<<s<<"目前饲养了"<<p1->fed_time<<"天,体重是"<<p1->weight<<endl; 
+	for(int i=0;p1!=NULL&&i<x;p1=p1->next);
+	cout<<"			此猪为";
+	if(p1->name==1) cout<<"黑猪,";
+	else if(p1->name==2) cout<<"小花猪,";
+	else cout<<"大花白猪,";
+	cout<<"目前饲养了"<<p1->fed_time<<"天,体重是"<<p1->weight<<"斤"<<endl; 
 } 
+void Pighouse::print_all(){
+	Pig *p1=head;
+	for(;p1!=NULL;p1=p1->next){
+		cout<<"			猪编号:"<<p1->id<<",品种为";
+		if(p1->name==1) cout<<"黑猪,";
+		else if(p1->name==2) cout<<"小花猪,";
+		else cout<<"大花白猪,";
+		cout<<"目前饲养了"<<p1->fed_time<<"天,体重是"<<p1->weight<<"斤"<<endl; 
+	}
+}
+void Pighouse::pupdate(){
+	srand((unsigned)time(NULL));
+	Pig*p=head;
+	while(p){
+		p->weight+=(double)(rand()%12)*1/10;
+		p->fed_time++;
+		p=p->next;
+	}
+}

@@ -6,76 +6,19 @@ int pigcnt;//总猪猪
 Pighouse ph[105];
 int Time;//游戏时间 单位:天 
 int Time_l;//记录两次出栏中间的间隔时间 ==90时出栏并置0 
-void print_Time(int x){//打印时间 
-	int y=0,m=0,d=0;	
-	y=x/360;//年
-	x%=360;
-	m=x/30;
-	x%=30;
-	d=x; 
-	printf("您已经饲养%2d年%2d月%2d天\n",y,m,d);
-} 
+void newpig(Pig *p);
+void newgames();
+void print_Time(int x);
 void startgame();
 void update();
-void update_m(){
-	for(int i=0;i<30;i++){
-		update();
-	}
-}
-void newgames(){//初始化 
-	money=0;
-	Time=0; 
-	//此处随机生成n只猪猪 种类 体重 饲养时间为0 
-};
-void regame(){//重新开始游戏 
-	for(int i=0;i<100;i++){
-			ph[i].clear();
-	}
-	newgames();//游戏初始化 
-}
-void print_imformation(){//打印玩家信息 
-	cout<<"			当前金币数："<<money<<"	总猪数："<<pigcnt<<"	饲养时间: ";
-	print_Time(Time);
-}
+void update_m();
+void regame();
+void print_imformation();
 void search_pighouse();
 void search_pighouse_pig();
-//void search_message();
-//void search_all();
-double sellcount(){//计算本回合卖猪总收入 
-	int m;
-	for(int i=0;i<100;i++){
-		m+=ph[i].sellpig();
-	} 
-	return m;
-}
-void newpig(Pig *p){//为新猪分配猪圈
-	int flag=0,sp=0;//sp:是否分配到空猪圈 
-  	if(p->name==1)//黑猪只能分配到黑猪圈/空猪圈 
-		flag=1;
-	for(int i=0;i<100;i++){
-		if(ph[i].Getpig_num()==0){
-			ph[i].buypig(p);
-			sp=1; 
-			cout<<"分配到空猪圈："<<i<<endl;
-			break;
-		}	
-	}
-	if(sp==0){
-		int min_num=20;
-		int index=101;
-		for(int i=0;i<100;i++){
-			if(ph[i].GetisBlack()==flag){
-				if(min_num > ph[i].Getpig_num()){
-					min_num=ph[i].Getpig_num();
-					index=i;
-				}
-			}
-		}
-		cout<<"被分配到猪圈："<<index<<endl;
-		ph[index].buypig(p);
-	}
-
-}
+void search_message();
+void search_all();
+double sellcount();
 void startsearch(){
 	searching();
 	int option;
@@ -95,14 +38,14 @@ void startsearch(){
 				break;
 			}
 			case 4:{//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况；
-				//search_message();
+				search_message();
 				break;
 			}
-			case 5:{//查询近5年猪的销售记录和猪崽儿的购入记录	
+			case 5:{//查询近5年猪的销售记录和猪崽儿的购入记录(文件)	
 				break;
 			}
 			case 6:{	//打印当前养猪场所有猪的所有信息
-				//search_all();
+				search_all();
 				break;
 			}
 			case 7:{//返回 
@@ -194,18 +137,77 @@ int main(){
 	
 	}
 }
+void print_Time(int x){//打印时间 
+	int y=0,m=0,d=0;	
+	y=x/360;//年
+	x%=360;
+	m=x/30;
+	x%=30;
+	d=x; 
+	printf("您已经饲养%2d年%2d月%2d天\n",y,m,d);
+} 
+void newpig(Pig *p){//为新猪分配猪圈
+	int flag=0,sp=0;//sp:是否分配到空猪圈 
+  	if(p->name==1)//黑猪只能分配到黑猪圈/空猪圈 
+		flag=1;
+	for(int i=0;i<100;i++){
+		if(ph[i].Getpig_num()==0){
+			ph[i].buypig(p);
+			sp=1; 
+			cout<<"分配到空猪圈："<<i<<endl;
+			break;
+		}	
+	}
+	if(sp==0){
+		int min_num=20;
+		int index=101;
+		for(int i=0;i<100;i++){
+			if(ph[i].GetisBlack()==flag){
+				if(min_num > ph[i].Getpig_num()){
+					min_num=ph[i].Getpig_num();
+					index=i;
+				}
+			}
+		}
+		cout<<"被分配到猪圈："<<index<<endl;
+		ph[index].buypig(p);
+	}
 
+}
 void update(){
 	if(Time_l==90){
 	//	Outpig();//出栏 
 	//	Getpig();//进猪 
+		Time_l=0;
 	} 
 	//此处应随机生成一个体重
 	 for(int i=0;i<100;i++){
-	//	ph[i].pupdate();
+		ph[i].pupdate();
 	} 
 	 
 }
+void update_m(){
+	for(int i=0;i<30;i++){
+		update();
+	}
+}
+void newgames(){//初始化 
+	money=0;
+	Time=0; 
+	Time_l=0;
+	srand((unsigned)time(NULL));
+	pigcnt=rand()%200+1;
+	int num=pigcnt;
+	Pig*p;
+	while(num--){
+		p=new Pig;
+		p->name=rand()%3+1;
+		p->weight=rand()%100+40;//随机初始化20-50公斤  
+		p->fed_time=0;
+		newpig(p);
+	} 
+	//此处随机生成n只猪猪 种类 体重 饲养时间为0 
+};
 void search_pighouse(){
 	int num;
 	cout<<"			请输入要查询的猪圈编号：";
@@ -232,4 +234,33 @@ void search_pighouse_pig(){
 		}
 	}
 	ph[num1].searchpig(num2);
+}
+void search_message(){
+	int num;
+	cout<<"			请输入要查询的猪圈编号：";
+	cin>>num;
+	ph[num].search();
+}
+void search_all(){
+	int num;
+	cout<<"			请输入要查询的猪圈编号：";
+	cin>>num;
+	ph[num].print_all();
+}
+double sellcount(){//计算本回合卖猪总收入 
+	int m;
+	for(int i=0;i<100;i++){
+		m+=ph[i].sellpig();
+	} 
+	return m;
+}
+void regame(){//重新开始游戏 
+	for(int i=0;i<100;i++){
+			ph[i].clear();
+	}
+	newgames();//游戏初始化 
+}
+void print_imformation(){//打印玩家信息 
+	cout<<"			当前金币数："<<money<<"	总猪数："<<pigcnt<<"	饲养时间: ";
+	print_Time(Time);
 }
