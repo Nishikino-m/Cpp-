@@ -20,6 +20,9 @@ struct Pig{
 	void countp(){
 		price=weight*value;
 	}
+	void growth(){
+		
+	}
 };
 //
 class Pighouse{
@@ -40,8 +43,10 @@ public:
 	void search1();//统计黑猪猪的数量和体重、饲养时间分布情况
 	void search2();//统计小花猪的数量和体重、饲养时间分布情况
 	void search3();//统计大花白猪的数量和体重、饲养时间分布情况
+	void searchpig(int x);
 	void search();//统计当前猪场每个品种猪的数量和体重、饲养时间分布情况
 	void clear();//清空当前猪圈 
+	void pupdate(); //更新猪猪信息 
 };
 
 Pighouse::Pighouse(){// 默认构造函数
@@ -228,5 +233,15 @@ void Pighouse::clear(){
 	head=NULL;
 	isBlack=0;
 } 
-
-
+void Pighouse::searchpig(int x){
+	Pig *p1=head;
+	for(;p1!=NULL;p1=p1->next){
+		if(p1->id==x)
+			break;
+	}
+	string s;
+	if(p1->name==1) s="黑猪";
+	else if(p1->name==2) s="小花猪";
+	else s="大花白猪";
+	cout<<"此猪为"<<s<<"目前饲养了"<<p1->fed_time<<"天,体重是"<<p1->weight<<endl; 
+} 
