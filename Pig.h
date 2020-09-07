@@ -38,7 +38,7 @@ public:
 	void printmessage();//输出猪圈信息：猪的种类＆数量
 	void Setids();//每次卖出后，重置猪的编号 
 	void buypig(Pig* p);//买进一只猪
-	double sellpig();//卖掉能卖的猪同时计算本次卖猪的收入 
+	double sellpig(ofstream&file);//卖掉能卖的猪同时计算本次卖猪的收入 ,并保存记录 
 	int search(int i);//计算种类为i的猪的数量 
 	void search1();//统计黑猪猪的数量和体重、饲养时间分布情况
 	void search2();//统计小花猪的数量和体重、饲养时间分布情况
@@ -48,6 +48,7 @@ public:
 	void clear();//清空当前猪圈 
 	void pupdate(); //更新猪猪信息 
 	void print_all();//打印所有猪猪所有信息 
+	void save(ofstream&savefile);               
 };
 
 Pighouse::Pighouse(){// 默认构造函数
@@ -95,6 +96,7 @@ void Pighouse::buypig(Pig *p){//买进一只猪
 	if(head==NULL){//第一头猪 
 		head=p; 
 		if(p->name==1) isBlack=1;
+		
 	}
 	else{
 		Pig *p1=head;
@@ -105,7 +107,7 @@ void Pighouse::buypig(Pig *p){//买进一只猪
 	}
 	p->id=pig_num;
 }
-double Pighouse::sellpig(){//卖掉能卖的猪 同时计算本次卖猪的收入 
+double Pighouse::sellpig(ofstream&file){//卖掉能卖的猪 同时计算本次卖猪的收入 
 	Pig *p1=head;
 	Pig *p2=head;//pre
 	double pricecnt=0;
@@ -114,8 +116,12 @@ double Pighouse::sellpig(){//卖掉能卖的猪 同时计算本次卖猪的收入
 			pig_num--;
 			p2->next=p1->next;
 		//	cout<<"(p1->price)"<<(p1->price); 
-			pricecnt+=(p1->price);
-			
+			file<<"售出一只";
+			if(p1->name==1) file<<"黑猪,";
+			else if(p1->name==2) file<<"小花猪,";
+			else file<<"大花白猪,";
+			file<<",售价为"<<(p1->price)<<"\n";
+			pricecnt+=(p1->price);	
 		}
 	}
 	Setids();
@@ -262,4 +268,20 @@ void Pighouse::pupdate(){
 		p->fed_time++;
 		p=p->next;
 	}
+}
+void Pighouse::save(ofstream&savefile){
+	if(head==NULL){
+		savefile<<'0'<<endl;
+		return;
+	}
+	else {
+		Pig*p=head;
+		int i=0;
+		savefile<<pig_num<<endl;
+	while(p){
+		savefile<<p->name<<"   "<<p->weight<<"   "<<p->fed_time<<endl;
+		i++;
+		p=p->next;
+	}
+}
 }
