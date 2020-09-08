@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+#include<windows.h>
 using namespace std;
 struct Pig{
 	int name;//种类:  1-黑猪  2-小花猪  3-大花白猪
@@ -8,27 +9,19 @@ struct Pig{
 	int fed_time;//饲养时间 
 	int id;//猪在猪圈里的编号 
 	Pig* next;//同一个猪圈的下一头猪 
-	Pig (){
-	};
-	Pig (int a,double w) : name(a) , weight(w){
+	void countp(){
 		if(name==1) value=15;
 		else if(name==2) value=7;
 		else value=6;
-		
-		return;
-	}
-	void countp(){
+	//	cout<<weight<<" * "<<value<<endl;
 		price=weight*value;
-	}
-	void growth(){
-		
 	}
 };
 //
 class Pighouse{
 private:
 	int pig_num;//猪圈中猪的数量
-	Pig *head;
+	Pig *head;//NULL 指向第一只猪猪 
 	bool isBlack;
 public:
 	Pighouse();//默认构造函数
@@ -64,6 +57,7 @@ int Pighouse::GetisBlack(){
 }
 void Pighouse::printmessage(){//输出猪圈信息：猪的种类＆数量
 	int c1=0,c2=0,c3=0;
+	cout<<"这个猪圈一共有"<<Getpig_num()<<"头猪猪\n";
 	Pig*p1=head;
 	for(;p1!=NULL;p1=p1->next){
 		if(p1->name==1) c1++;
@@ -83,15 +77,14 @@ void Pighouse::printmessage(){//输出猪圈信息：猪的种类＆数量
 }
 void Pighouse::Setids(){//每次卖出后，重置猪的编号 
 	Pig *p1=head;
-	int id=0;
+	int iid=0;
 	for(;p1!=NULL;p1=p1->next){
-		p1->id=id;
-		id++;	
+		p1->id=iid;
+		iid++;	
 	}
-	if(id==0) isBlack=0;//没猪了 
+	if(iid==0) isBlack=0;//没猪了 
 }
 void Pighouse::buypig(Pig *p){//买进一只猪
-	pig_num++;
 	p->next=NULL;
 	if(head==NULL){//第一头猪 
 		head=p; 
@@ -106,25 +99,31 @@ void Pighouse::buypig(Pig *p){//买进一只猪
 		p1->next=p;
 	}
 	p->id=pig_num;
+		pig_num++;
 }
 double Pighouse::sellpig(ofstream&file){//卖掉能卖的猪 同时计算本次卖猪的收入 
 	Pig *p1=head;
 	Pig *p2=head;//pre
 	double pricecnt=0;
 	for(;p1!=NULL;p1=p1->next,p2=p1){
+		p1->countp();
 		if(p1->fed_time>360||p1->weight>150){//可以售出 
 			pig_num--;
-			p2->next=p1->next;
-		//	cout<<"(p1->price)"<<(p1->price); 
+			p2->next=p1->next; 
 			file<<"售出一只";
 			if(p1->name==1) file<<"黑猪,";
 			else if(p1->name==2) file<<"小花猪,";
 			else file<<"大花白猪,";
+		file<<"单价为："<<p1->value<<"重量为："<<p1->weight;
 			file<<",售价为"<<(p1->price)<<"\n";
 			pricecnt+=(p1->price);	
+		//	Sleep(100);
 		}
 	}
-	Setids();
+	if((Getpig_num()==0)){
+		head=NULL;
+	}
+	else Setids();
 	return pricecnt;
 }
 int Pighouse::search(int i){//计算种类为i的猪的数量 
@@ -264,7 +263,7 @@ void Pighouse::pupdate(){
 	srand((unsigned)time(NULL));
 	Pig*p=head;
 	while(p){
-		p->weight+=(double)(rand()%12)*1/10;
+		p->weight+=(double)(rand()%12)*1/10.0;
 		p->fed_time++;
 		p=p->next;
 	}
