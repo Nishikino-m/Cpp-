@@ -73,7 +73,9 @@ void Pighouse::addpig(Pig* p){//添加一只猪
 	} 
 	p1->next=p;
 }
-double Pighouse::sellpig(ofstream&file){//卖掉能卖的猪 同时计算本次卖猪的收入 
+double Pighouse::sellpig(ofstream&ffile){//卖掉能卖的猪 同时计算本次卖猪的收入 
+	ofstream file;
+	file.open("RRRRecord.txt",ios::app);
 	if (pig_num==0) {
 		return 0;
 	}
@@ -92,20 +94,20 @@ double Pighouse::sellpig(ofstream&file){//卖掉能卖的猪 同时计算本次卖猪的收入
 			}
 			pig_num--;
 			p2->next=p1->next; 
-		//	file<<"本次售出一只";
+			file<<"本次售出一只";
 			if(p1->name==1){
-			//	file<<"黑猪,";
+				file<<"黑猪,";
 				p1->price=15*(p1->weight);	
 			} 
 			else if(p1->name==2){
-			//	file<<"小花猪,";
+				file<<"小花猪,";
 				p1->price=7*(p1->weight);
 			} 
 			else{
-			//	file<<"大花白猪,";
+				file<<"大花白猪,";
 				p1->price=6*(p1->weight);
 			} 
-			//file<<"销售额"<<(p1->price)<<"\n";
+			file<<"销售额"<<(p1->price)<<"\n";
 			pricecnt+=(p1->price);	
 			delete p1;
 			p1=p2->next;
@@ -120,6 +122,7 @@ double Pighouse::sellpig(ofstream&file){//卖掉能卖的猪 同时计算本次卖猪的收入
 		}
 	}
 	Setids();
+	file.close();
 	return pricecnt;
 }
 void Pighouse::Setids(){//每次卖出后，重置猪的编号 
