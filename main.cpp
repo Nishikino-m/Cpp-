@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 #include<windows.h>
-#include"pigpig.h" 
+#include"pigpig.h"
+#include"classp.h" 
 using namespace std;
 double money;//当前财富 
 int pigcnt;//总猪猪 
@@ -25,6 +26,7 @@ void Getpig();
 void start_byfile();
 void save_file();
 void save_sell(int t,double x);
+void search_file();
 void startsearch(){
 	searching();
 	int option;
@@ -48,7 +50,7 @@ void startsearch(){
 				break;
 			}
 			case 5:{//查询近5年猪的销售记录和猪崽儿的购入记录(文件)
-				//search_file();	
+				search_file();	
 				break;
 			}
 			case 6:{	//打印当前养猪场所有猪的所有信息
@@ -110,9 +112,9 @@ void startgame(){
 		if(option!=1){
 			system("cls"); 
 			openning();
+			cin>>option;
 		}
-		else cout<<"		请键入您的选择：";
-	cin>>option;
+	
 	}
 }
 
@@ -166,7 +168,7 @@ void newpig(Pig *p){//为新猪分配猪圈
 		flag=1;
 	for(int i=0;i<100;i++){
 		if(ph[i].Getpig_num()==0){
-			ph[i].buypig(p);
+			ph[i].addpig(p);
 			sp=1; 
 			cout<<"分配到空猪圈："<<i<<endl;
 			break;
@@ -185,8 +187,10 @@ void newpig(Pig *p){//为新猪分配猪圈
 		}
 		if(flag==1)	cout<<"被分配到黑猪圈："<<index<<endl;
 		else cout<<"被分配到猪圈："<<index<<endl;
-	
-		ph[index].buypig(p);
+		if(index>99) {
+		cout<<"ERROR! 猪圈满了" ;
+		return;} 
+		ph[index].addpig(p);
 	}
 
 }
@@ -200,7 +204,7 @@ void update(){
 	//此处应随机生成一个体重 每日更新 
 	 for(int i=0;i<100;i++){
 		ph[i].pupdate();
-	} 
+	}
 	 
 }
 void update_m(){
@@ -212,6 +216,15 @@ void newgames(){//初始化
 	money=0;
 	Time=0; 
 	Time_l=0;
+	ofstream file;
+	file.open("Record.txt",ios::trunc);
+	file.close();
+	ofstream per;
+	per.open("Player.txt",ios::trunc);
+	per.close();
+	ofstream saved;
+	saved.open("Gamedata.txt",ios::trunc);
+	saved.close();
 	srand((unsigned)time(NULL));
 	pigcnt=rand()%200+1;
 	int num=pigcnt;
@@ -219,7 +232,7 @@ void newgames(){//初始化
 	while(num--){
 		p=new Pig;
 		p->name=rand()%3+1;
-		p->weight=rand()%100+40;//随机初始化20-50公斤  
+		p->weight=rand()%61+40;//随机初始化20-50公斤  
 		p->fed_time=0;
 		newpig(p);
 		
@@ -259,6 +272,7 @@ void search_message(){
 	while(1){
 		cout<<"			请输入要查询的猪圈编号：";
 		cin>>num;
+	
 		if(num>=100) cout<<"ERROR!猪圈编号需要小于100\n";
 		else {
 			ph[num].search();
@@ -278,32 +292,27 @@ void search_all(){
 			break;
 		}
 	}
-
 }
-double sellcount(){//计算本回合卖猪总收入  
+
+double sellcount(){//计算本回合卖猪总收入   
 	double m=0;
 	ofstream file;
 	file.open("Record.txt",ios::app);
 	int qqq=0;
-//	cout<<"猪场共有"<<pigcnt<<"只猪猪\n"; 
 	for(int i=0;i<100;i++){
 		int pre=ph[i].Getpig_num();
-	///	cout<<"猪圈编号"<<i<<" 原有"<<ph[i].Getpig_num()<<"只猪，";
 		double a=ph[i].sellpig(file);
 		if(a){
-			m+=a;
-	//	cout<<"猪圈编号"<<i<<"售出额为"<<a<<"元\n";
-		//Sleep(1000);		
+			m+=a;		
 		}	
 		int now=ph[i].Getpig_num();
 		int cot=pre-now;
 		qqq+=cot;
 		cout<<"本猪圈售出"<<cot<<"只猪猪\n";
-		pigcnt-=cot;
-		//cout<<"现在剩余"<<ph[i].Getpig_num()<<"只猪\n"; 
-	} 	file.close();
-//	cout<<"猪场现有"<<pigcnt<<"只猪猪\n";
+	}
+		file.close();
 	cout<<"本次一共售出"<<qqq<<"只猪猪\n";
+	pigcnt-=qqq; 
 	Sleep(1005);
 	return m;
 }
@@ -320,13 +329,19 @@ void print_imformation(){//打印玩家信息
 void start_byfile(){
 	ifstream getim;//读取玩家信息 
 	getim.open("Player.txt");
+	if(!getim){
+		cout<<"ERROR:读取数据失败！\n";
+		exit(0);
+	}
 	getim>>pigcnt>>money>>Time>>Time_l; 
+	cout<<"			读取玩家信息成功！\n";
 	getim.close();
+	
 	ifstream read;
 	read.open("Gamedata.txt");
 	if(!read){
-		cout<<"ERROR:读取数据失败！";
-		exit(0);
+		cout<<"ERROR:读取数据失败！\n";
+			exit(0);
 	}
 	int pign;
 	Pig*p;
@@ -341,26 +356,28 @@ void start_byfile(){
 			}
 			else read>>p->weight>>p->fed_time;
 			p->countp();
-			ph[i].buypig(p);
+			ph[i].addpig(p);
+		cout<<p->name<<" "<<p->weight<<" "<<p->fed_time<<endl;
 		}	
 	}
-	
 	read.close();
-	cout<<"读取数据成功！"<<endl;
+	cout<<"			读取猪圈数据成功！"<<endl;
+	Sleep(10000); 
 }
 void save_file(){
-
 	ofstream saved;
-	saved.open("Player.txt",ios::trunc);
+	saved.open("Player.txt");
 	saved<<pigcnt<<"	"<<money<<"	"<<Time<<"	"<<Time_l; 
 	cout<<"保存玩家信息成功！"<<endl;
 	saved.close();
 	ofstream saveg;
-	saveg.open("Gamedata.txt",ios::trunc);
+	saveg.open("Gamedata.txt");
+	cout<<"打开文件成功\n";Sleep(500);
 	for(int i=0;i<100;i++){
 		ph[i].save(saveg);
 	}
 	cout<<"保存猪猪信息成功！"<<endl;	
+	Sleep(105);
 	saveg.close();
 }
 void Outpig(){
@@ -381,7 +398,8 @@ void Getpig(){
 		p=new Pig;
 		p->name=rand()%3+1;
 		p->weight=rand()%100+40;//随机初始化20-50公斤  
-		p->fed_time=0;
+		p->fed_time=-1;
+		p->countp(); 
 		newpig(p);
 		
 	}
@@ -390,8 +408,27 @@ void Getpig(){
 void save_sell(int t,double x){
 	ofstream file;
 	file.open("Record.txt",ios::app);
-	file<<"饲养时间: "<<t<<" 天，共获得销售额"<<x<<"元\n"; 
+	file<<t<<"	"<<x<<"	"<<endl; 
 	//大于五年判断一下？ 
 	file.close();
 } 
-
+void search_file(){//五年内 
+	ifstream pre_file;//源文件 
+	pre_file.open("Record.txt");
+	if(!pre_file){
+		cout<<"打开出圈信息文件失败";
+		exit(0);
+	} 
+	int tmp=1;
+	double coin=0;
+	pre_file>>tmp;
+	cout<<"Tmp="<<tmp<<endl;
+	while(tmp){
+		pre_file>>coin;
+			cout<<"饲养时间: "<<tmp<<"天，共获得销售额"<<coin<<"元\n";
+		pre_file>>tmp;
+		cout<<"Tmp="<<tmp<<endl;
+		Sleep(200);
+	}	
+	pre_file.close(); 
+}
