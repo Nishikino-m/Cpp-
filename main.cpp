@@ -255,7 +255,7 @@ void search_pighouse_pig(){
 	cin>>num1;
 	while(1){
 		if(num1>=0&&num1<100&&ph[num1].Getpig_num()>0)	break;//合法非空猪圈号 
-		else cout<<"			此猪圈为空，请重新输入：";
+		else cout<<"			此猪圈为空或不存在，请重新输入：";
 		cin>>num1;
 	}
 	cout<<"			此猪圈共有"<<ph[num1].Getpig_num()<<"头猪,请输入要查询的猪猪编号：";

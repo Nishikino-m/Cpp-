@@ -239,19 +239,19 @@ void Pighouse::search3(){
 
 }
 void Pighouse::searchpig(int x){//查询编号为x的猪猪 
+
 	Pig *p1=head;
 	int i=0;
-	for(;p1!=NULL&&i<x;p1=p1->next);
-	if(i==x){
-		cout<<"			此猪为";
+	for(;p1!=NULL&&i<x;p1=p1->next,i++){
+	
+	}
+
+	cout<<"			此猪为";
 	if(p1->name==1) cout<<"黑猪,";
 	else if(p1->name==2) cout<<"小花猪,";
 	else cout<<"大花白猪,";
 	cout<<"目前饲养了"<<p1->fed_time<<"天,体重是"<<p1->weight<<"斤"<<endl; 
-	}
-	else {
-		cout<<"此猪猪不存在嗷\n"; 
-	}
+
 }
 void Pighouse::printmessage(){//输出猪圈信息：猪的种类＆数量
 	if(Getpig_num()==0){
