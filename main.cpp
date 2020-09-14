@@ -1,3 +1,4 @@
+
 #include<bits/stdc++.h>
 #include<windows.h>
 #include"pigpig.h"
@@ -8,6 +9,7 @@ int pigcnt;//总猪猪
 Pighouse ph[105];
 int Time;//游戏时间 单位:天 
 int Time_l;//记录两次出栏中间的间隔时间 ==90时出栏并置0 
+
 void newpig(Pig *p);
 void newgames();
 void print_Time(int x);
@@ -26,13 +28,31 @@ void Getpig();
 void start_byfile();
 void save_file();
 void save_sell(int t,double x);
+void save_buy(int t,int x);
 void search_file();
+void search_buy();
+double submoney(int name,double weight);
+int opt,numm;
+int change(string a){
+	int len=a.size();
+//	int ss=1;
+	int ans=0;
+	for(int i=len-1;i>=0;i--){
+		if(a[i]>'9'||a[i]<'0'){
+			return 404;
+		}
+		ans*=10;
+		ans+=a[i]-'0';
+	}
+	return ans;
+}
 void startsearch(){
 	searching();
-	int option;
+	string option;
 	cin>>option;
+		opt=change(option);
 	while(1){
-		switch(option){
+		switch(opt){
 			case 1:{
 				print_imformation();
 				break;
@@ -51,6 +71,7 @@ void startsearch(){
 			}
 			case 5:{//查询近5年猪的销售记录和猪崽儿的购入记录(文件)
 				search_file();	
+				search_buy();
 				break;
 			}
 			case 6:{	//打印当前养猪场所有猪的所有信息
@@ -61,22 +82,26 @@ void startsearch(){
 				startgame();
 			}
 			default:{
-				cout<<"		请键入您的选择：";
-				cin>>option;
+//				cout<<"		请键入您的选择：";
+				cout<<"		ERROR! 此选项不存在\n";
+//				cin>>option;
+//				opt=change(option);
 				break;
 			}
 		}
-	cout<<"		请键入您的选择：";
+	cout<<"		请键入您的选择(查询)：";
 	cin>>option;
+	opt=change(option);
 	}
 }
 
 void startgame(){
 	openning();
-	int option;
+	string option;
 	cin>>option;
+	opt=change(option);
 	while(1){
-		switch(option){
+		switch(opt){
 			case 1:{//查询 
 				system("cls");//清屏 
 				startsearch();//进入查询
@@ -104,15 +129,17 @@ void startgame(){
 				exit(0);
 			}
 			default:{
-				cout<<"		请键入您的选择：";
-				cin>>option;
+//				cout<<"		请键入您的选择：";
+//				cin>>option;
+//					opt=change(option);
 				break;
 			}
 		}
-		if(option!=1){
+		if(opt!=1){
 			system("cls"); 
-			openning();
+			openning();//包含请输入选择了 
 			cin>>option;
+			opt=change(option);
 		}
 	
 	}
@@ -120,10 +147,12 @@ void startgame(){
 
 int main(){
 	menu();
-	int option;
+	string option;
 	cin>>option;
+	opt=change(option);
 	while(1){
-		switch(option){
+	//	cout<<"opt="<<opt;
+		switch(opt){
 			case 1:{
 			system("cls");//清屏 此处应是一个游戏的函数 
 			newgames();
@@ -143,14 +172,15 @@ int main(){
 				exit(0);
 			}
 			default:{
-				cout<<"		请键入您的选择：";
-				cin>>option;
+//				cout<<"		请键入您的选择：";
+//				cin>>option;
+//				opt=change(option);
 				break;
 			}
 		}
-
+	cout<<"		请键入您的选择：";
 	cin>>option;
-	
+	opt=change(option);
 	}
 }
 void print_Time(int x){//打印时间 
@@ -189,11 +219,12 @@ void newpig(Pig *p){//为新猪分配猪圈
 		else cout<<"被分配到猪圈："<<index<<endl;
 		if(index>99) {
 		cout<<"ERROR! 猪圈满了" ;
-		Sleep(10000);
+		//Sleep(10000);
 		return;} 
 		ph[index].addpig(p);
+		
+		
 	}
-
 }
 void update(){
 	Time_l++; 
@@ -240,58 +271,76 @@ void newgames(){//初始化
 		newpig(p);
 		
 	} 
-
+	//Sleep(10000); 
 	//此处随机生成n只猪猪 种类 体重 饲养时间为0 
 };
 void search_pighouse(){
-	int num;
+	string num;
 	cout<<"			请输入要查询的猪圈编号：";
 	cin>>num;
-	ph[num].printmessage();
+	numm=change(num);
+	while(1){
+		if(numm>=0&&numm<100){
+			ph[numm].printmessage();
+			break;
+		}
+		cout<<"\n			请输入要查询的猪圈编号：";
+	cin>>num;
+	numm=change(num);
+		
+	}
+	
+	
 }
 void search_pighouse_pig(){
-	int num1,num2;
+	string num1,num2;
 	cout<<"			请输入要查询的猪圈编号：";
 	cin>>num1;
+	int num11=change(num1);
 	while(1){
-		if(num1>=0&&num1<100&&ph[num1].Getpig_num()>0)	break;//合法非空猪圈号 
+		if(num11>=0&&num11<100&&ph[num11].Getpig_num()>0)	break;//合法非空猪圈号 
 		else cout<<"			此猪圈为空或不存在，请重新输入：";
 		cin>>num1;
+		num11=change(num1);
 	}
-	cout<<"			此猪圈共有"<<ph[num1].Getpig_num()<<"头猪,请输入要查询的猪猪编号：";
+	cout<<"			此猪圈共有"<<ph[num11].Getpig_num()<<"头猪,请输入要查询的猪猪编号：";
 	cin>>num2;
+	int num22=change(num2);
 	while(1){
-		if(num2<(ph[num1].Getpig_num())&&num2>=0)
+		if(num22<(ph[num11].Getpig_num())&&num22>=0)
 			break;
 		else{
 			cout<<"			此猪不存在，请重新输入：";
 		cin>>num2;
+		num22=change(num2);
 		}
 	}
-	ph[num1].searchpig(num2);
+	ph[num11].searchpig(num22);
 }
 void search_message(){
-	int num;
+	string num;
+	numm=change(num);
 	while(1){
 		cout<<"			请输入要查询的猪圈编号：";
 		cin>>num;
-	
-		if(num>=100) cout<<"ERROR!猪圈编号需要小于100\n";
+	numm=change(num);
+		if(numm>=100) cout<<"			ERROR!猪圈编号需要小于100\n";
 		else {
-			ph[num].search();
+			ph[numm].search();
 			break;
 		}
 	}
 	
 }
 void search_all(){
-	int num;
+	string num;
 	while(1){
 		cout<<"			请输入要查询的猪圈编号：";
 		cin>>num;
-		if(num>=100) cout<<"ERROR!猪圈编号需要小于100\n";
+		numm=change(num);
+		if(numm>=100) cout<<"			ERROR!猪圈编号需要小于100\n";
 		else {
-			ph[num].print_all();
+			ph[numm].print_all();
 			break;
 		}
 	}
@@ -311,13 +360,13 @@ double sellcount(){//计算本回合卖猪总收入
 		int now=ph[i].Getpig_num();
 		int cot=pre-now;
 		qqq+=cot;
-	//	cout<<"本猪圈售出"<<cot<<"只猪猪\n";
+		cout<<"本猪圈售出"<<cot<<"只猪猪\n";
 	}
 	
 //	file<<"本次一共售出"<<qqq<<"只猪猪\n";
 	file.close();
 	pigcnt-=qqq; 
-//	Sleep(1005);
+	//Sleep(1005);
 	return m;
 }
 void regame(){//重新开始游戏 
@@ -394,19 +443,31 @@ void Outpig(){
 void Getpig(){
 	srand((unsigned)time(NULL));
 	int num=rand()%200+1;
-///	cout<<"新入栏"<<num<<"只猪\n";
+	cout<<"新入栏"<<num<<"只猪\n";
 	
 	pigcnt+=num;
+	int prenum=num;
 	Pig*p;
+	double pric=0.0;
 	while(num--){
 		p=new Pig;
 		p->name=rand()%3+1;
 		p->weight=rand()%100+40;//随机初始化20-50公斤  
 		p->fed_time=-1;
 		p->countp(); 
+		pric=submoney(p->name,p->weight);
+		if(money-pric<=0){
+			cout<<"num="<<num<<endl;
+			Sleep(1000);
+			pigcnt-=num;
+			save_buy(Time,(prenum-num));
+			return;
+		}
+		money-=pric;
 		newpig(p);
 		
 	}
+	save_buy(Time,prenum);
 //	 Sleep(1000);
 }
 void save_sell(int t,double x){
@@ -426,6 +487,10 @@ void search_file(){
 	double coin=0;
 	int temp=17;
 	pre_file>>tmp;
+	if(tmp==1){
+		cout<<"		尚未经历出圈！请选择其它\n";
+		return;
+	}
 	while(1){
 		pre_file>>coin;
 		if(tmp>(Time-1800))
@@ -436,4 +501,53 @@ void search_file(){
 		if(temp==tmp) break;
 	}	
 	pre_file.close(); 
+}
+void save_buy(int t ,int x){
+	ofstream file;
+	file.open("Buy_Record.txt",ios::app);
+	file<<t<<"	"<<x<<"	"<<endl; 
+	file.close();
+} 
+
+void search_buy(){
+	ifstream pre_file;//源文件 
+	pre_file.open("Buy_Record.txt");
+	if(!pre_file){
+		cout<<"			打开购猪信息文件失败\n";
+		exit(0);
+	} 
+	int tmp=1;
+	int buynum=0;
+	int temp=17;
+	pre_file>>tmp;
+	if(tmp==1){
+		cout<<"		尚未经历购猪崽崽！请选择其它\n";
+		return;
+	}
+	while(1){
+		pre_file>>buynum;
+		if(tmp>(Time-1800))
+			cout<<"			饲养时间: "<<tmp<<"天，购入猪猪"<<buynum<<"只\n";
+			temp=tmp;
+	
+		pre_file>>tmp;//	cout<<"Temp="<<temp<<"	Tmp="<<temp<<endl;
+		if(temp==tmp) break;
+	}	
+	pre_file.close(); 
+	
+}
+
+double submoney(int name,double weight){
+	double pri=0.0;
+	if(name==1){
+		pri=(10*weight);
+	}
+	else if(name==2){
+		pri=(2*weight);
+	}
+	else if(name==3){
+		pri=(1*weight);
+	}
+	return pri;
+
 }
