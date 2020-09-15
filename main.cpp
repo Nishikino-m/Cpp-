@@ -21,6 +21,7 @@ void search_pighouse();
 void search_pighouse_pig();
 void search_message();
 void search_all();
+void print_All(); 
 double sellcount();
 void Outpig();
 void Getpig();
@@ -78,7 +79,7 @@ void mainmenu(){
 				break;
 			}
 		}
-	cout<<"		请键入您的选择：";
+	if(opt!=3)	cout<<"		请键入您的选择：";
 	cin>>option;
 	opt=change(option);
 	}
@@ -115,7 +116,11 @@ void startsearch(){
 				search_all();
 				break;
 			}
-			case 7:{//返回 
+			case 7:{//打印所有猪圈的信息 
+				print_All();
+				break;
+			} 
+			case 8:{//返回 
 				startgame();
 			}
 			default:{
@@ -126,7 +131,7 @@ void startsearch(){
 				break;
 			}
 		}
-	cout<<"		请键入您的选择(查询)：";
+	cout<<"		请键入您的选择(查询)[输入8返回功能菜单]：";
 	cin>>option;
 	opt=change(option);
 	}
@@ -366,7 +371,16 @@ void search_all(){
 		}
 	}
 }
-
+void print_All(){
+	for(int i=0;i<100;i++){
+		cout<<"\n\n		=========================猪圈编号:"<<i<<"=========================\n\n\n"; 
+		if(ph[i].Getpig_num())
+			ph[i].print_all();
+		else {
+			cout<<"			是一个空猪圈\n";
+		}
+	}
+} 
 double sellcount(){//计算本回合卖猪总收入   
 	double m=0;
 	ofstream file;
@@ -462,12 +476,17 @@ void Outpig(){
 	save_sell(Time,sale_v);//保存总出售记录//时间、 总收入 
 }
 void Getpig(){
+	ofstream saved;
+	saved.open("BBBBuy_Record.txt");
 	srand((unsigned)time(NULL));
 	int num=rand()%50+1;
+	int precnt=pigcnt;
 	pigcnt+=num;
+	
 	int prenum=num;
 	Pig*p;
 	double pric=0.0;
+	saved<<"购猪时间:"<<Time<<"		本次预计购猪"<<num<<"头\n"; 
 	while(num){
 		p=new Pig;
 		p->name=rand()%3+1;
@@ -475,11 +494,17 @@ void Getpig(){
 		p->fed_time=-1;
 		p->countp(); 
 		pric=submoney(p->name,p->weight);
+		saved<<"购入种类："<<p->name<<"\n体重为："<<p->weight<<"\n";
 		if(money-pric<=0){
 			delete p;
 		//	cout<<"num="<<num<<endl;
 		//	Sleep(1000);
+		
 			pigcnt-=num;
+			saved<<"由于资金不足，本次实际购入"<<prenum-num<<"头\n"; 
+			saved.close();
+		//	cout<<"本次猪猪数量改变:"<<(precnt-pigcnt)<<"头\n";
+			Sleep(200);
 			save_buy(Time,(prenum-num));
 			return;
 		}
@@ -487,8 +512,11 @@ void Getpig(){
 		newpig(p);
 		num--;
 	}
+	saved.close();
+//	cout<<"本次猪猪数量改变:"<<(precnt-pigcnt)<<"头\n";
+//	Sleep(200);
 	save_buy(Time,prenum);
-//	 Sleep(1000);
+	 
 }
 void save_sell(int t,double x){
 	ofstream file;
@@ -611,7 +639,7 @@ void Simulated(){
 		}
 		day++;	
 		Time++;
-	//	cout<<"day= "<<day<<"  患病猪猪有 "<<illpig<<"头\n";
+		cout<<"day= "<<day<<"  患病猪猪有 "<<illpig<<"头\n";
 		//Sleep(500);
 	}while(flag1);
 	cout<<"\n\n\n\n\n		==============================================================\n\n";
