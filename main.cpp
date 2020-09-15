@@ -1,4 +1,3 @@
-
 #include<bits/stdc++.h>
 #include<windows.h>
 #include"pigpig.h"
@@ -9,12 +8,12 @@ int pigcnt;//总猪猪
 Pighouse ph[105];
 int Time;//游戏时间 单位:天 
 int Time_l;//记录两次出栏中间的间隔时间 ==90时出栏并置0 
-
 void newpig(Pig *p);
 void newgames();
 void print_Time(int x);
 void startgame();
 void update();
+void update_fever();
 void update_m();
 void regame();
 void print_imformation();
@@ -31,11 +30,11 @@ void save_sell(int t,double x);
 void save_buy(int t,int x);
 void search_file();
 void search_buy();
+void Simulated();//模拟猪瘟 
 double submoney(int name,double weight);
 int opt,numm;
-int change(string a){
+int change(string a){//字符串转数字 
 	int len=a.size();
-//	int ss=1;
 	int ans=0;
 	for(int i=len-1;i>=0;i--){
 		if(a[i]>'9'||a[i]<'0'){
@@ -45,6 +44,44 @@ int change(string a){
 		ans+=a[i]-'0';
 	}
 	return ans;
+}
+void mainmenu(){
+	menu();
+	string option;
+	cin>>option;
+	opt=change(option);
+	while(1){
+	//	cout<<"opt="<<opt;
+		switch(opt){
+			case 1:{
+			system("cls");//清屏 此处应是一个游戏的函数 
+			newgames();
+			startgame();
+			break;} 
+			case 2: {
+				start_byfile();
+				startgame();
+				break;
+			}
+			case 3: {
+				system("cls");
+				Help();
+				break;
+			}
+			case 4:{
+				exit(0);
+			}
+			default:{
+//				cout<<"		请键入您的选择：";
+//				cin>>option;
+//				opt=change(option);
+				break;
+			}
+		}
+	cout<<"		请键入您的选择：";
+	cin>>option;
+	opt=change(option);
+	}
 }
 void startsearch(){
 	searching();
@@ -128,12 +165,29 @@ void startgame(){
 			case 6:{
 				exit(0);
 			}
+			case 7:{
+				system("cls"); 
+				Simulated_Help();
+				Simulated();
+				break;
+			}
+			case 8:{
+				system("cls"); 
+				mainmenu();
+				break;
+			} 
 			default:{
 //				cout<<"		请键入您的选择：";
 //				cin>>option;
 //					opt=change(option);
 				break;
 			}
+		}
+		if(opt==7){
+			cout<<"		重新载入游戏中...\n";
+			Sleep(100);
+			newgames();
+			startgame();
 		}
 		if(opt!=1){
 			system("cls"); 
@@ -144,44 +198,9 @@ void startgame(){
 	
 	}
 }
-
 int main(){
-	menu();
-	string option;
-	cin>>option;
-	opt=change(option);
-	while(1){
-	//	cout<<"opt="<<opt;
-		switch(opt){
-			case 1:{
-			system("cls");//清屏 此处应是一个游戏的函数 
-			newgames();
-			startgame();
-			break;} 
-			case 2: {
-				start_byfile();
-				startgame();
-				break;
-			}
-			case 3: {
-				system("cls");
-				Help();
-				break;
-			}
-			case 4:{
-				exit(0);
-			}
-			default:{
-//				cout<<"		请键入您的选择：";
-//				cin>>option;
-//				opt=change(option);
-				break;
-			}
-		}
-	cout<<"		请键入您的选择：";
-	cin>>option;
-	opt=change(option);
-	}
+
+	mainmenu();
 }
 void print_Time(int x){//打印时间 
 	int y=0,m=0,d=0;	
@@ -192,7 +211,7 @@ void print_Time(int x){//打印时间
 	d=x; 
 	printf("您已经饲养%2d年%2d月%2d天\n",y,m,d);
 } 
-void newpig(Pig *p){//为新猪分配猪圈
+void newpig(Pig *p){//为新猪分配猪圈 
 	int flag=0,sp=0;//sp:是否分配到空猪圈 
   	if(p->name==1)//黑猪只能分配到黑猪圈/空猪圈 
 		flag=1;
@@ -200,7 +219,7 @@ void newpig(Pig *p){//为新猪分配猪圈
 		if(ph[i].Getpig_num()==0){
 			ph[i].addpig(p);
 			sp=1; 
-			cout<<"分配到空猪圈："<<i<<endl;
+		//	cout<<"分配到空猪圈："<<i<<endl;
 			break;
 		}	
 	}
@@ -215,8 +234,8 @@ void newpig(Pig *p){//为新猪分配猪圈
 				}
 			}
 		}
-		if(flag==1)	cout<<"被分配到黑猪圈："<<index<<endl;
-		else cout<<"被分配到猪圈："<<index<<endl;
+	//	if(flag==1)	cout<<"被分配到黑猪圈："<<index<<endl;
+	//	else cout<<"被分配到猪圈："<<index<<endl;
 		if(index>99) {
 		cout<<"ERROR! 猪圈满了" ;
 		//Sleep(10000);
@@ -252,6 +271,8 @@ void newgames(){//初始化
 	file.open("Record.txt",ios::trunc);
 	file.close();
 	file.open("RRRRecord.txt",ios::trunc);
+	file.close();
+	file.open("Buy_Record.txt",ios::trunc);
 	file.close();
 	ofstream per;
 	per.open("Player.txt",ios::trunc);
@@ -360,7 +381,7 @@ double sellcount(){//计算本回合卖猪总收入
 		int now=ph[i].Getpig_num();
 		int cot=pre-now;
 		qqq+=cot;
-		cout<<"本猪圈售出"<<cot<<"只猪猪\n";
+	//	cout<<"本猪圈售出"<<cot<<"只猪猪\n";
 	}
 	
 //	file<<"本次一共售出"<<qqq<<"只猪猪\n";
@@ -442,14 +463,12 @@ void Outpig(){
 }
 void Getpig(){
 	srand((unsigned)time(NULL));
-	int num=rand()%200+1;
-	cout<<"新入栏"<<num<<"只猪\n";
-	
+	int num=rand()%50+1;
 	pigcnt+=num;
 	int prenum=num;
 	Pig*p;
 	double pric=0.0;
-	while(num--){
+	while(num){
 		p=new Pig;
 		p->name=rand()%3+1;
 		p->weight=rand()%100+40;//随机初始化20-50公斤  
@@ -457,15 +476,16 @@ void Getpig(){
 		p->countp(); 
 		pric=submoney(p->name,p->weight);
 		if(money-pric<=0){
-			cout<<"num="<<num<<endl;
-			Sleep(1000);
+			delete p;
+		//	cout<<"num="<<num<<endl;
+		//	Sleep(1000);
 			pigcnt-=num;
 			save_buy(Time,(prenum-num));
 			return;
 		}
 		money-=pric;
 		newpig(p);
-		
+		num--;
 	}
 	save_buy(Time,prenum);
 //	 Sleep(1000);
@@ -536,18 +556,69 @@ void search_buy(){
 	pre_file.close(); 
 	
 }
-
 double submoney(int name,double weight){
 	double pri=0.0;
 	if(name==1){
-		pri=(10*weight);
+		pri=500;
 	}
 	else if(name==2){
-		pri=(2*weight);
+		pri=100;
 	}
 	else if(name==3){
-		pri=(1*weight);
+		pri=50;
 	}
 	return pri;
 
+}
+void Simulated(){
+	srand((unsigned)time(NULL));
+	int illnum=rand()%100;//随机一个患病猪圈 
+	//如果随机出的猪圈是空的，直接重新开始函数 
+	if(ph[illnum].Getpig_num()==0){
+		cout<<"Another \n";
+		Simulated();
+		return;
+	} 
+	int day=0,illpig=1;
+	int newill=0;
+	ph[illnum].SetisIll();//此猪圈有患病猪(头 
+	int flag1=0;//遍历一遍 有无相邻猪圈患病 有则置1 继续循环 
+	do{
+		//cout<<"DO\n";
+		flag1=0;
+		for(int i=0;i<100;i++){
+			newill=0;
+			if(ph[i].GetisIll()){
+				if(ph[i].Getill_num()!=ph[i].Getpig_num()){
+					newill+=ph[i].Simulated_fever(50);
+					flag1=1;
+				}
+				
+				if(i-1>=0){
+					if(ph[i-1].Getill_num()!=ph[i-1].Getpig_num()) flag1=1;
+					newill+=ph[i-1].Simulated_fever(15);
+					
+				}
+				if(i+1<100){
+					if(ph[i+1].Getill_num()!=ph[i+1].Getpig_num()) flag1=1;
+					newill+=ph[i+1].Simulated_fever(15);
+				
+				
+				}
+			}	illpig+=newill;
+		//	if(newill>0)
+		//	cout<<"猪圈编号"<<i<<"新增患病猪猪"<<newill<<"头\n";
+		}
+		day++;	
+		Time++;
+	//	cout<<"day= "<<day<<"  患病猪猪有 "<<illpig<<"头\n";
+		//Sleep(500);
+	}while(flag1);
+	cout<<"\n\n\n\n\n		==============================================================\n\n";
+	cout<<"					猪瘟情况\n\n";
+	cout<<"		经过"<<day<<"天，养猪场共有"<<illpig<<"只猪猪患病\n		剩余"<<(pigcnt-illpig)<<"只猪猪因为没有相邻猪圈有患病猪而幸存\n"; 
+	getchar();
+	if(getchar()){
+	system("cls");
+	}
 }
