@@ -3,6 +3,7 @@
 #include"pigpig.h"
 #include"classp.h" 
 using namespace std;
+/*test Git*/
 double money;//当前财富 
 int pigcnt;//总猪猪 
 Pighouse ph[105];
